@@ -1,9 +1,9 @@
 all: bankingServer bankingClient
 
-bankingServer:
+bankingServer: bankingServer.c
 	gcc -g -fsanitize=address -pthread bankingServer.c -o bankingServer
 
-bankingClient:
+bankingClient: bankingClient.c
 	gcc -g -fsanitize=address -pthread bankingClient.c -o bankingClient
 
 
