@@ -20,17 +20,20 @@ int main(int argc, char ** argv) {
             	error("Error opening socket\n");
 		exit(1);	
 	}
-        struct hostent * server = gethostbyname(srvname);
 	printf("Host name acquired.\n");
-        if (server == NULL) {
-            	printf("Error! No host named %s\n", srvname);
-            	exit(0);
-        }
+      //  if (server < 0) {
+        //    	printf("Error! No host named %s\n", srvname);
+          //  	exit(0);
+       // }
 //	printf("sockfd: %d\n", sockfd);	
 	struct sockaddr_in serv_addr;
 	memset(&serv_addr, '0', sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(portnum);
+	//serv_addr.sin_addr.s_addr = inet_addr(srvname);
+	struct hostent * server;
+	server = gethostbyname(srvname);
+	bcopy((char*)server->h_addr, (char*)&serv_addr.sin_addr.s_addr, server->h_length);
 	printf("Attempting to connect...\n");
 	int cnct = connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr));
     	if (cnct < 0){
