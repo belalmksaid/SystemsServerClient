@@ -5,7 +5,7 @@
 #define IN_SESSION 'i'
 #define NOT_IN_SESSION 'o'
 
-typdef struct  
+typedef struct  
 {
     char* name;
     float balance;
