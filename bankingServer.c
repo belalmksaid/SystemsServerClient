@@ -49,6 +49,14 @@ int main(int argc, char** argv) {
         if(newsock < 0) {
             error("accept() failed");
         }
+        memset(buffer, 256, 0);
+        int n = read(newsock, buffer, 255);
+        if(n < 0) {
+            error("read() failed");
+        }
+        printf(buffer);
+        printf("\n");
+        write(newsock, "GOT I!", 6);
     } 
     
     //interruption handling
