@@ -8,11 +8,6 @@
 
 volatile bool INTERRUPTED = false;
 
-void error(char* msg) {
-    perror(msg);
-    exit(1);
-}
-
 void SIGINT_HANDLER(int d) {
     INTERRUPTED = true;
 }
