@@ -19,12 +19,14 @@ void SIGINT_HANDLER(int d) {
 }
 
 void kill_all() {
-    thread_node* trav = threads.head;
+    thread_node* trav = threads.head, *temp;
     pthread_t* ids = (pthread_t*)malloc(threads.size * sizeof(pthread_t));
     int i = 0, j = 0;
     while(trav != NULL) {
         ids[i++] = trav->t_id;
+        temp = trav->next;
         trav->die = true;
+        trav = temp;
     }
     for(j = 0; j < i; j++) {
         pthread_join(ids[j], NULL);
@@ -34,7 +36,7 @@ void kill_all() {
 
 void process_socket(void* nd) {
     thread_node * node = (thread_node*) nd;
-    while(!node->die) {
+    while(!(node->die)) {
 
     }
     {

@@ -11,8 +11,8 @@
 #define true 1
 #define false 0
 
-#define SHUTDOWNMESSAGE "SHUTDOWN"
-#define SHUTDOWNMESSAGE_LEN 8
+#define SHUTDOWNMESSAGE "SHUTDOWN\n"
+#define SHUTDOWNMESSAGE_LEN 9
 
 void error(char* msg) {
     perror(msg);
@@ -28,6 +28,7 @@ typedef struct tnd {
     int newsocket_fd;
     struct l_l *parent_list;
     bool die;
+    pthread_mutex_t die_lock;
 } thread_node;
 
 typedef struct l_l {
@@ -51,11 +52,13 @@ thread_node* create_thread_node(linked_list* list) {
     return node;
 }
 
+
 void delete_node(thread_node* node) {
     if(node == NULL) {
         error("Can't delete a null node.");
     }
-    pthread_mutex_lock(&(node->parent_list->mutex));
+    linked_list* temp = node->parent_list;
+    pthread_mutex_lock(&(temp->mutex));
     if(node->prev != NULL)
         node->prev->next = node->next;
     if(node->next != NULL)
@@ -65,7 +68,7 @@ void delete_node(thread_node* node) {
     }
     node->parent_list->size -= 1;
     free(node);
-    pthread_mutex_unlock(&(node->parent_list->mutex));
+    pthread_mutex_unlock(&(temp->mutex));
 }
 
 #endif
