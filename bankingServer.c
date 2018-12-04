@@ -7,9 +7,12 @@
 #include <netinet/in.h>
 
 volatile bool INTERRUPTED = false;
+volatile bool PASTACCEPT = false;
 
 void SIGINT_HANDLER(int d) {
     INTERRUPTED = true;
+    if(!PASTACCEPT)
+        exit(0);
 }
 
 int main(int argc, char** argv) {
@@ -43,9 +46,11 @@ int main(int argc, char** argv) {
     listen(sockfd, 128);
 
     while(!INTERRUPTED) {
+        PASTACCEPT = false;
         struct sockaddr_in clientaddress;
         int clientsize = sizeof(clientaddress);
         int newsock = accept(sockfd, (struct sockaddr*) &clientaddress, &clientsize);
+        PASTACCEPT = true;
         if(newsock < 0) {
             error("accept() failed");
         }
