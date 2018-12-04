@@ -10,7 +10,7 @@
 typedef struct  
 {
     char* name;
-    float balance;
+    double balance;
     session_flag session;
     pthread_mutex_t lock;
 

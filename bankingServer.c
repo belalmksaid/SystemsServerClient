@@ -12,17 +12,42 @@ volatile linked_list threads;
 
 void SIGINT_HANDLER(int d) {
     INTERRUPTED = true;
-    if(!PASTACCEPT)
+    if(!PASTACCEPT) {
+        kill_all();
         exit(0);
+    }
 }
 
-void process_socket() {
+void kill_all() {
+    thread_node* trav = threads.head;
+    pthread_t* ids = (pthread_t*)malloc(threads.size * sizeof(pthread_t));
+    int i = 0, j = 0;
+    while(trav != NULL) {
+        ids[i++] = trav->t_id;
+        trav->die = true;
+    }
+    for(j = 0; j < i; j++) {
+        pthread_join(ids[j], NULL);
+    }
+    free(ids);
+}
 
+void process_socket(void* nd) {
+    thread_node * node = (thread_node*) nd;
+    while(!node->die) {
+
+    }
+    {
+        write(node->newsocket_fd, SHUTDOWNMESSAGE, SHUTDOWNMESSAGE_LEN);
+        shutdown(node->newsocket_fd, SHUT_RDWR);
+    }
+    delete_node(node);
 }
 
 int main(int argc, char** argv) {
     signal(SIGINT, SIGINT_HANDLER);
     threads.head = NULL;
+    threads.size = 0;
 
     int port = -1;
     
@@ -67,7 +92,7 @@ int main(int argc, char** argv) {
     
     //interruption handling
     {
-
+        kill_all();
     }
     return 0;
 }
