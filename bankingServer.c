@@ -8,6 +8,7 @@
 
 volatile bool INTERRUPTED = false;
 volatile bool PASTACCEPT = false;
+volatile linked_list threads;
 
 void SIGINT_HANDLER(int d) {
     INTERRUPTED = true;
@@ -15,8 +16,13 @@ void SIGINT_HANDLER(int d) {
         exit(0);
 }
 
+void process_socket() {
+
+}
+
 int main(int argc, char** argv) {
     signal(SIGINT, SIGINT_HANDLER);
+    threads.head = NULL;
 
     int port = -1;
     
@@ -54,14 +60,9 @@ int main(int argc, char** argv) {
         if(newsock < 0) {
             error("accept() failed");
         }
-        memset(buffer, 256, 0);
-        int n = read(newsock, buffer, 255);
-        if(n < 0) {
-            error("read() failed");
-        }
-        printf(buffer);
-        printf("\n");
-        write(newsock, "GOT I!", 6);
+        thread_node* node = create_thread_node(&threads);
+        node->newsocket_fd = newsock;
+        int error = pthread_create(&(node->t_id), NULL, process_socket, (void *)node);
     } 
     
     //interruption handling
