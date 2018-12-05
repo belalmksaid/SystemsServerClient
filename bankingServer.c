@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/time.h>
+#include <fcntl.h>
 
 volatile bool INTERRUPTED = false;
 volatile bool PASTACCEPT = false;
@@ -41,9 +42,10 @@ void kill_all() {
 }
 
 void flag_print_all(int sig) {
+    if(INTERRUPTED) return;
     pthread_mutex_lock(&print_mutex);
     printing = true;
-    if(threads.size > 0)
+    if(mainbank.size > 0)
         pthread_barrier_init(&print_barrier, NULL, threads.size);
     else {
         printing = false;
@@ -78,9 +80,41 @@ void print_accounts() {
     }
 }
 
+void parse_command(char* buffer, int n, serve_session* session) {
+    if(strstr(buffer, CREATE) != NULL) {
+        if(session->acc == NULL) {
+            if(n <= (CREATE_LEN + 1)) {
+                write(session->node->newsocket_fd, INVALIDCOMMAND, INVALIDCOMMAND_LEN);
+            }
+            else {
+                if(add_account(&mainbank, buffer + CREATE_LEN + 1, 0.0, NOT_IN_SESSION) == 0) {
+                    write(session->node->newsocket_fd, ACCOUNTEXISTS, ACCOUNTEXISTS_LEN);
+                }
+                else {
+                    write(session->node->newsocket_fd, ACCOUNTSUCCESS, ACCOUNTSUCCESS_LEN);
+                }
+            }
+        }
+        else {
+            write(session->node->newsocket_fd, CANNOTCREATEACCT, CANNOTCREATEACCT_LEN);
+        }
+    }
+}
+
 void process_socket(void* nd) {
     thread_node * node = (thread_node*) nd;
+    int n;
+    serve_session session;
+    session.acc = NULL;
+    session.node = node;
+    int flags = fcntl(node->newsocket_fd, F_GETFL, 0);
+    fcntl(node->newsocket_fd, F_SETFL, flags | O_NONBLOCK);
     while(!(node->die)) {
+        char buffer[1024];
+        n = read(node->newsocket_fd, buffer, 1023);
+        if(n > 0) {
+            parse_command(buffer, n, &session);
+        }
         print_accounts();
     }
     {
@@ -121,7 +155,6 @@ int main(int argc, char** argv) {
     }
 
     int sockfd, newsockfd;
-    char buffer[256];
     struct sockaddr_in serv_addr;
     int n;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -134,7 +167,6 @@ int main(int argc, char** argv) {
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
         error("ERROR on binding");
     listen(sockfd, 128);
-
     while(!INTERRUPTED) {
         PASTACCEPT = false;
         struct sockaddr_in clientaddress;

@@ -12,9 +12,35 @@
 #define false 0
 #define PRINTINTERVAL 15000
 
+///// Commands
+#define CREATE "create"
+#define CREATE_LEN 6
+#define SERVE "serve"
+#define SERVE_LEN 5
+#define QUERY "query"
+#define QUERY_LEN 5
 
+
+///// Errors
 #define SHUTDOWNMESSAGE "SHUTDOWN"
 #define SHUTDOWNMESSAGE_LEN 8
+
+#define READINGERROR "ERROR1"
+#define READINGERROR_LEN 6
+
+#define INVALIDCOMMAND "ERROR2"
+#define INVALIDCOMMAND_LEN 6
+
+#define CANNOTCREATEACCT "ERROR3" // cannot create account in session
+#define CANNOTCREATEACCT_LEN 6
+
+#define ACCOUNTEXISTS "ERROR4"
+#define ACCOUNTEXISTS_LEN 6
+
+
+//// Success
+#define ACCOUNTSUCCESS "Account created successfully"
+#define ACCOUNTSUCCESS_LEN 28
 
 
 void error(char* msg) {

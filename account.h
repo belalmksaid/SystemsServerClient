@@ -31,6 +31,11 @@ typedef struct {
     pthread_mutex_t bank_lock;
 } bank;
 
+typedef struct {
+    account* acc;
+    thread_node* node;
+} serve_session;
+
 unsigned long hash(unsigned char *str)
 {
     unsigned long hash = 5381;
@@ -70,9 +75,14 @@ uint add_to_map(bank* bk, char* name, int index) {
 }
 
 
-int add_account(bank* bk, char* name, double balance, session_flag flag) {
+int add_account(bank* bk, char* nm, double balance, session_flag flag) {
+    char* name = (char*)calloc(256, sizeof(char));
+    strcpy(name, nm);
+    int l = strlen(name);
+    name[l - 2] = '\0';
+
     if(get_account(bk, name) != NULL) {
-        return -1; // account already exists
+        return 0; // account already exists
     }
     pthread_mutex_lock(&(bk->bank_lock));
     if(bk->size == bk->max_size) {

@@ -1,6 +1,6 @@
 all: bankingServer bankingClient
 
-bankingServer: bankingServer.c commons.h
+bankingServer: bankingServer.c commons.h account.h
 	gcc -g -fsanitize=address -w -pthread bankingServer.c -o bankingServer
 
 bankingClient: bankingClient.c
