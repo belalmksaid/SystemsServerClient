@@ -5,10 +5,15 @@
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/time.h>
 
 volatile bool INTERRUPTED = false;
 volatile bool PASTACCEPT = false;
 volatile linked_list threads;
+
+volatile bool printing = false;
+pthread_mutex_t print_mutex;
+pthread_barrier_t print_barrier;
 
 void SIGINT_HANDLER(int d) {
     INTERRUPTED = true;
@@ -34,6 +39,10 @@ void kill_all() {
     free(ids);
 }
 
+void print_all(int sig) {
+    
+}
+
 void process_socket(void* nd) {
     thread_node * node = (thread_node*) nd;
     while(!(node->die)) {
@@ -48,11 +57,22 @@ void process_socket(void* nd) {
 
 int main(int argc, char** argv) {
     signal(SIGINT, SIGINT_HANDLER);
+    if(signal(SIGALRM, print_all) == SIG_ERR) {
+        error("Could not signal alarm.");
+    }
+
+    struct itimerval it_val;
+    it_val.it_value.tv_sec = PRINTINTERVAL / 1000;
+    it_val.it_value.tv_usec = (PRINTINTERVAL * 1000) % 1000000;   
+    it_val.it_interval = it_val.it_value; 
+    if(setitimer(ITIMER_REAL, &it_val, NULL) == -1) {
+        error("Could not set timer.");
+    }
+
     threads.head = NULL;
     threads.size = 0;
 
     int port = -1;
-    
     if(argc != 2) {
         error("Incorrect number of arguments supplied. Expected one: port number.");
     }

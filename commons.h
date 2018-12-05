@@ -10,9 +10,12 @@
 #define bool char
 #define true 1
 #define false 0
+#define PRINTINTERVAL 15000
+
 
 #define SHUTDOWNMESSAGE "SHUTDOWN\n"
 #define SHUTDOWNMESSAGE_LEN 9
+
 
 void error(char* msg) {
     perror(msg);
