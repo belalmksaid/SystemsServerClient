@@ -10,6 +10,7 @@
 volatile bool INTERRUPTED = false;
 volatile bool PASTACCEPT = false;
 volatile linked_list threads;
+volatile bank mainbank;
 
 volatile bool printing = false;
 pthread_mutex_t print_mutex;
@@ -39,27 +40,60 @@ void kill_all() {
     free(ids);
 }
 
-void print_all(int sig) {
+void flag_print_all(int sig) {
     pthread_mutex_lock(&print_mutex);
     printing = true;
+    if(threads.size > 0)
+        pthread_barrier_init(&print_barrier, NULL, threads.size);
+    else {
+        printing = false;
+        printf("There are no accounts in the bank to print\n");
+    }
     pthread_mutex_unlock(&print_mutex);
+}
+
+void print_accounts() {
+    if(printing) {
+        pthread_barrier_wait(&print_barrier);
+        pthread_mutex_lock(&print_mutex);
+        if(printing) {
+            pthread_mutex_lock(&(mainbank.bank_lock));
+            int i = 0;
+            printf("Diagnostic Account Print\n");
+            for(i = 0; i < mainbank.size; i++) {
+                printf("Information for account: %s\n", mainbank.accounts[i].name);
+                printf("Balance: $%lf\n", mainbank.accounts[i].balance);
+                printf("Session flag: ");
+                if(mainbank.accounts[i].session == IN_SESSION) {
+                    printf("In Session\n\n");
+                }
+                else {
+                    printf("Not in Session\n\n");
+                }
+            }
+            pthread_mutex_unlock(&(mainbank.bank_lock));
+            printing = false;
+        }
+        pthread_mutex_unlock(&print_mutex);
+    }
 }
 
 void process_socket(void* nd) {
     thread_node * node = (thread_node*) nd;
     while(!(node->die)) {
-
+        print_accounts();
     }
     {
         write(node->newsocket_fd, SHUTDOWNMESSAGE, SHUTDOWNMESSAGE_LEN);
         shutdown(node->newsocket_fd, SHUT_RDWR);
     }
+    print_accounts();
     delete_node(node);
 }
 
 int main(int argc, char** argv) {
     signal(SIGINT, SIGINT_HANDLER);
-    if(signal(SIGALRM, print_all) == SIG_ERR) {
+    if(signal(SIGALRM, flag_print_all) == SIG_ERR) {
         error("Could not signal alarm.");
     }
 
@@ -73,15 +107,16 @@ int main(int argc, char** argv) {
 
     threads.head = NULL;
     threads.size = 0;
+    mainbank = create_bank();
 
     int port = -1;
     if(argc != 2) {
-        error("Incorrect number of arguments supplied. Expected one: port number.");
+        error("ERROR incorrect number of arguments supplied. Expected one: port number.");
     }
     else {
         port = atoi(argv[1]);
         if(port <= 0) {
-            error("Incorrect argument for port number.");
+            error("ERROR incorrect argument for port number.");
         }
     }
 

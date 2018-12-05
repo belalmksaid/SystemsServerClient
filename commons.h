@@ -13,8 +13,8 @@
 #define PRINTINTERVAL 15000
 
 
-#define SHUTDOWNMESSAGE "SHUTDOWN\n"
-#define SHUTDOWNMESSAGE_LEN 9
+#define SHUTDOWNMESSAGE "SHUTDOWN"
+#define SHUTDOWNMESSAGE_LEN 8
 
 
 void error(char* msg) {
