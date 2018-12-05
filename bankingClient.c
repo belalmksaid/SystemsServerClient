@@ -4,7 +4,28 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <unistd.h>
 #include "commons.h"
+
+//struct to serve as input and output to read_srv function (for multithreading).
+typedef struct { 
+	char * buffer;
+	int sockfd;
+} thread_pointer;
+
+//multithreading function
+void * read_srvr(void * args) {
+	thread_pointer * tp = (thread_pointer*)args;
+	char * buffer = tp->buffer;
+	int sockfd = tp->sockfd;
+	int n = read(sockfd, buffer, 255);
+	if (n < 0) {
+	     error("Error! Could not read from socket.\n");
+	}
+	printf("%s\n",buffer);
+//FREE my n****s
+	return NULL;
+}
 
 int main(int argc, char ** argv) {
 	if(argc != 3) {
@@ -21,10 +42,6 @@ int main(int argc, char ** argv) {
 		exit(1);	
 	}
 	printf("Host name acquired.\n");
-      //  if (server < 0) {
-        //    	printf("Error! No host named %s\n", srvname);
-          //  	exit(0);
-       // }
 //	printf("sockfd: %d\n", sockfd);	
 	struct sockaddr_in serv_addr;
 	memset(&serv_addr, '0', sizeof(serv_addr));
@@ -33,6 +50,9 @@ int main(int argc, char ** argv) {
 	//serv_addr.sin_addr.s_addr = inet_addr(srvname);
 	struct hostent * server;
 	server = gethostbyname(srvname);
+        if (server == NULL) {
+            	error("Error! Invalid hostname.");
+        }
 	bcopy((char*)server->h_addr, (char*)&serv_addr.sin_addr.s_addr, server->h_length);
 	printf("Attempting to connect...\n");
 	int cnct = connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr));
@@ -52,11 +72,17 @@ int main(int argc, char ** argv) {
 		     error("Error! Could not write to socket.\n");
 		}
 		bzero(buffer,256);
-		n = read(sockfd, buffer, 255);
-		if (n < 0) {
-		     error("Error! Could not read from socket.\n");
+		thread_pointer * tp = (thread_pointer*)malloc(sizeof(thread_pointer));
+		tp->buffer = buffer;
+		tp->sockfd = sockfd;
+		pthread_t tid;
+	 	int err = pthread_create(&tid, NULL, read_srvr, (void *)tp);
+		if(err != 0){
+			error("Error! Could not create thread!");
 		}
-		printf("%s\n",buffer);
+
+	//	read_srvr((void*)tp);
+		sleep(2);
 	}
 
 	return 0;
