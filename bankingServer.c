@@ -96,9 +96,30 @@ void parse_command(char* buffer, int n, serve_session* session) {
             }
         }
         else {
-            write(session->node->newsocket_fd, CANNOTCREATEACCT, CANNOTCREATEACCT_LEN);
+            write(session->node->newsocket_fd, ALREADYINSESSION, ALREADYINSESSION_LEN);
         }
     }
+    else if (strstr(buffer, SERVE) != NULL)
+    {
+       if(session->acc == NULL) {
+            if(n <= (SERVE_LEN + 1)) {
+                write(session->node->newsocket_fd, INVALIDCOMMAND, INVALIDCOMMAND_LEN);
+            }
+            else {
+                session->acc = get_account(&mainbank, buffer + SERVE_LEN + 1);
+                if(session->acc == NULL) {
+                     write(session->node->newsocket_fd, ACCOUNTDOESNTEXIST, ACCOUNTDOESNTEXIST_LEN);
+                }
+                else {
+                    write(session->node->newsocket_fd, RETRIEVESUCCESS, RETRIEVESUCCESS_LEN);
+                }
+            }
+       }
+       else {
+           write(session->node->newsocket_fd, ALREADYINSESSION, ALREADYINSESSION_LEN);
+       }
+    }
+    
 }
 
 void process_socket(void* nd) {

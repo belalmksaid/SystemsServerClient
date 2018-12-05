@@ -31,16 +31,22 @@
 #define INVALIDCOMMAND "ERROR2"
 #define INVALIDCOMMAND_LEN 6
 
-#define CANNOTCREATEACCT "ERROR3" // cannot create account in session
-#define CANNOTCREATEACCT_LEN 6
+#define ALREADYINSESSION "ERROR3" // cannot create account while in session
+#define ALREADYINSESSION_LEN 6
 
 #define ACCOUNTEXISTS "ERROR4"
 #define ACCOUNTEXISTS_LEN 6
+
+#define ACCOUNTDOESNTEXIST "ERROR5"
+#define ACCOUNTDOESNTEXIST_LEN 6
 
 
 //// Success
 #define ACCOUNTSUCCESS "Account created successfully"
 #define ACCOUNTSUCCESS_LEN 28
+
+#define RETRIEVESUCCESS "Account retrieved successfully"
+#define RETRIEVESUCCESS_LEN 30
 
 
 void error(char* msg) {
