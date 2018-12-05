@@ -40,7 +40,9 @@ void kill_all() {
 }
 
 void print_all(int sig) {
-    
+    pthread_mutex_lock(&print_mutex);
+    printing = true;
+    pthread_mutex_unlock(&print_mutex);
 }
 
 void process_socket(void* nd) {
