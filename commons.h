@@ -15,13 +15,24 @@
 ///// Commands
 #define CREATE "create"
 #define CREATE_LEN 6
+
 #define SERVE "serve"
 #define SERVE_LEN 5
+
 #define QUERY "query"
 #define QUERY_LEN 5
+
 #define END "end"
 #define END_LEN 3
 
+#define QUIT "quit"
+#define QUIT_LEN 4
+
+#define WITHDRAW "withdraw"
+#define WITHDRAW_LEN 8
+
+#define DEPOSIT "deposit"
+#define DEPOSIT_LEN 7
 
 ///// Errors
 #define SHUTDOWNMESSAGE "SHUTDOWN"
@@ -45,6 +56,15 @@
 #define ACCOUNTINUSE "ERROR6"
 #define ACCOUNTINUSE_LEN 6
 
+#define NOACTIVESESSION "ERROR7"
+#define NOACTIVESESSION_LEN 6
+
+#define NEGATIVEDEPOSIT "ERROR8"
+#define NEGATIVEDEPOSIT_LEN 6
+
+#define OVERDRAW "ERROR9"
+#define OVERDRAW_LEN 6
+
 
 //// Success
 #define ACCOUNTSUCCESS "Account created successfully"
@@ -52,6 +72,9 @@
 
 #define RETRIEVESUCCESS "Account retrieved successfully"
 #define RETRIEVESUCCESS_LEN 30
+
+#define SESSIONENDED "Session ended successfully"
+#define SESSIONENDED_LEN 26
 
 
 void error(char* msg) {

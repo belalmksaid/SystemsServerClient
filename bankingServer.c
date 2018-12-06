@@ -139,6 +139,86 @@ void parse_command(char* buffer, int n, serve_session* session) {
            write(session->node->newsocket_fd, ALREADYINSESSION, ALREADYINSESSION_LEN);
        }
     }
+    else if (strstr(buffer, QUERY) != NULL)
+    {
+       if(session->acc != NULL) {
+            char output[50];
+            snprintf(output, 50, "%f", session->acc->balance);
+            write(session->node->newsocket_fd, output, strlen(output));
+       }
+       else {
+           write(session->node->newsocket_fd, NOACTIVESESSION, NOACTIVESESSION_LEN);
+       }
+    }
+    else if (strstr(buffer, DEPOSIT) != NULL)
+    {
+        if(n <= (DEPOSIT_LEN + 1)) {
+            write(session->node->newsocket_fd, INVALIDCOMMAND, INVALIDCOMMAND_LEN);
+        }
+        else {
+            if(session->acc != NULL) {
+                int x = DEPOSIT_LEN + 1;
+                double am = atof(buffer + x);
+                if(am < 0.0) {
+                     write(session->node->newsocket_fd, NEGATIVEDEPOSIT, NEGATIVEDEPOSIT_LEN);
+                }
+                else {
+                    session->acc->balance += am;
+                    char output[50];
+                    snprintf(output, 50, "%f", session->acc->balance);
+                    write(session->node->newsocket_fd, output, strlen(output));
+                }
+            }
+            else {
+                write(session->node->newsocket_fd, NOACTIVESESSION, NOACTIVESESSION_LEN);
+            }
+        }
+    }
+    else if (strstr(buffer, WITHDRAW) != NULL)
+    {
+        if(n <= (WITHDRAW_LEN + 1)) {
+            write(session->node->newsocket_fd, INVALIDCOMMAND, INVALIDCOMMAND_LEN);
+        }
+        else {
+            if(session->acc != NULL) {
+                int x = WITHDRAW_LEN + 1;
+                double am = atof(buffer + x);
+                if(am > session->acc->balance) {
+                     write(session->node->newsocket_fd, OVERDRAW, OVERDRAW_LEN);
+                }
+                else {
+                    session->acc->balance -= am;
+                    char output[50];
+                    snprintf(output, 50, "%f", session->acc->balance);
+                    write(session->node->newsocket_fd, output, strlen(output));
+                }
+            }
+            else {
+                write(session->node->newsocket_fd, NOACTIVESESSION, NOACTIVESESSION_LEN);
+            }
+        }
+    }
+
+    else if (strstr(buffer, END) != NULL)
+    {
+        if(session->acc == NULL) {
+            write(session->node->newsocket_fd, NOACTIVESESSION, NOACTIVESESSION_LEN);
+        }
+        else {
+            pthread_mutex_lock(&(session->acc->lock));
+            session->acc->session = NOT_IN_SESSION;
+            pthread_mutex_unlock(&(session->acc->lock));
+            write(session->node->newsocket_fd, SESSIONENDED, SESSIONENDED_LEN);
+        }
+    }
+    else if (strstr(buffer, QUIT) != NULL) {
+        if(session->acc != NULL && session->acc->session == IN_SESSION) {
+            parse_command(END, END_LEN, session);
+        }
+        pthread_mutex_lock(&(session->node->die_lock));
+        session->node->die = true;
+        pthread_mutex_unlock(&(session->node->die_lock));
+    }
     else {
         write(session->node->newsocket_fd, INVALIDCOMMAND, INVALIDCOMMAND_LEN);
     }
