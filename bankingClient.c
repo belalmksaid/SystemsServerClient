@@ -56,14 +56,16 @@ int main(int argc, char ** argv) {
 	bcopy((char*)server->h_addr, (char*)&serv_addr.sin_addr.s_addr, server->h_length);
 	printf("Attempting to connect...\n");
 	int cnct = connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr));
-    	if (cnct < 0){
-        	error("Error! Could not connect.\n");
+    	while (cnct < 0){
+        	printf("Error! Could not connect to %s. Trying again in 3 seconds...\n", srvname);
+		sleep(3);
+		cnct = connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr));
 	}
 	printf("Connected to server %s\n", srvname);
     	printf("Enter command:  ");
 	char buffer[512];
 	memset(&buffer,'0', 512);
-	while(strcmp(buffer, "Shutdown") != 0) {
+	while(strcmp(buffer, SHUTDOWNMESSAGE) != 0) {
     		printf("Enter command:  ");
 		memset(&buffer,'0', 512);
 		fgets(buffer, 511, stdin);
@@ -80,7 +82,7 @@ int main(int argc, char ** argv) {
 		if(err != 0){
 			error("Error! Could not create thread!");
 		}
-
+		pthread_join(tid, NULL);
 	//	read_srvr((void*)tp);
 		sleep(2);
 	}
