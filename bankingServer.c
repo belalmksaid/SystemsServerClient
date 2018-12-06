@@ -231,6 +231,7 @@ void process_socket(void* nd) {
     serve_session session;
     session.acc = NULL;
     session.node = node;
+    write(node->newsocket_fd, SUCCESSFULLCONNECTION, SUCCESSFULLCONNECTION_LEN);
     int flags = fcntl(node->newsocket_fd, F_GETFL, 0);
     fcntl(node->newsocket_fd, F_SETFL, flags | O_NONBLOCK);
     while(!(node->die)) {

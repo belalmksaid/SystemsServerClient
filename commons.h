@@ -76,6 +76,9 @@
 #define SESSIONENDED "Session ended successfully"
 #define SESSIONENDED_LEN 26
 
+#define SUCCESSFULLCONNECTION "Server announces acceptance of connection from client"
+#define SUCCESSFULLCONNECTION_LEN 53
+
 
 void error(char* msg) {
     perror(msg);
