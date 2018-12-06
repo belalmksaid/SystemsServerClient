@@ -47,7 +47,7 @@ void flag_print_all(int sig) {
     if(INTERRUPTED) return;
     pthread_mutex_lock(&print_mutex);
     printing = true;
-    print_count = mainbank.size;
+    print_count = threads.size;
     if(mainbank.size == 0) {
         printing = false;
         printf("There are no accounts in the bank to print\n");
@@ -158,6 +158,7 @@ void parse_command(char* buffer, int n, serve_session* session) {
         else {
             if(session->acc != NULL) {
                 int x = DEPOSIT_LEN + 1;
+                strip(buffer + x);
                 double am = atof(buffer + x);
                 if(am < 0.0) {
                      write(session->node->newsocket_fd, NEGATIVEDEPOSIT, NEGATIVEDEPOSIT_LEN);
@@ -182,6 +183,7 @@ void parse_command(char* buffer, int n, serve_session* session) {
         else {
             if(session->acc != NULL) {
                 int x = WITHDRAW_LEN + 1;
+                strip(buffer + x);
                 double am = atof(buffer + x);
                 if(am > session->acc->balance) {
                      write(session->node->newsocket_fd, OVERDRAW, OVERDRAW_LEN);

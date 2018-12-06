@@ -138,9 +138,9 @@ void delete_node(thread_node* node) {
 }
 
 void strip(char* inop) {
-    int l = strlen(inop) - 1;
-    while(l >= 0 && (inop[l] == '\n' || inop[l] == '\r')) l--;
-    inop[l + 1] = '\0';
+    int l = 0;
+    while(inop[l] != '\n' && inop[l] != '\r' && inop[l] != '\0') l++;
+    inop[l] = '\0';
 }
 
 #endif
