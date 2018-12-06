@@ -208,6 +208,7 @@ void parse_command(char* buffer, int n, serve_session* session) {
             pthread_mutex_lock(&(session->acc->lock));
             session->acc->session = NOT_IN_SESSION;
             pthread_mutex_unlock(&(session->acc->lock));
+            session->acc = NULL;
             write(session->node->newsocket_fd, SESSIONENDED, SESSIONENDED_LEN);
         }
     }
