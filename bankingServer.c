@@ -139,6 +139,9 @@ void parse_command(char* buffer, int n, serve_session* session) {
            write(session->node->newsocket_fd, ALREADYINSESSION, ALREADYINSESSION_LEN);
        }
     }
+    else {
+        write(session->node->newsocket_fd, INVALIDCOMMAND, INVALIDCOMMAND_LEN);
+    }
     
 }
 
