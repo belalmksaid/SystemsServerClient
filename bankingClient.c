@@ -22,7 +22,36 @@ void * read_srvr(void * args) {
 	if (n < 0) {
 	     error("Error! Could not read from socket.\n");
 	}
-	printf("%s\n",buffer);
+	else if(strcmp(buffer, READINGERROR) == 0){
+		printf("Reading error. Please try again.\n");
+	}
+	else if(strcmp(buffer, INVALIDCOMMAND) == 0) {
+		printf("Invalid command. Please try again.\n");
+	}
+	else if(strcmp(buffer, ALREADYINSESSION) == 0) {
+		printf("Already in session. Please \"end\" and then try again.\n");
+	}
+	else if(strcmp(buffer, ACCOUNTEXISTS) == 0) {
+		printf("That account already exists. Please enter a new name.\n");
+	}
+	else if(strcmp(buffer, ACCOUNTDOESNTEXIST) == 0) {
+		printf("That account doesn't exist. Please try again.\n");
+	}
+	else if(strcmp(buffer, ACCOUNTINUSE) == 0) {
+		printf("That account is in use already.\n");
+	}
+	else if(strcmp(buffer, NOACTIVESESSION) == 0) {
+		printf("There is no active session yet. Please start one with \"serve [account name]\".\n");
+	}
+	else if(strcmp(buffer, NEGATIVEDEPOSIT) == 0) {
+		printf("You can't deposit a negative amount. Please try withdrawing.\n");
+	}
+	else if(strcmp(buffer, OVERDRAW) == 0) {
+		printf("Overdraw error.\n");
+	}
+	else {
+		printf("%s\n",buffer);
+	}
 //FREE my n****s
 	return NULL;
 }
