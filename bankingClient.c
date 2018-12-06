@@ -115,6 +115,7 @@ int main(int argc, char ** argv) {
 	//	read_srvr((void*)tp);
 		sleep(2);
 	}
+	printf("Server disconnected.");
 
 	return 0;
 }
