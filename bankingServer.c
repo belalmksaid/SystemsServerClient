@@ -15,7 +15,7 @@ volatile bank mainbank;
 
 volatile bool printing = false;
 pthread_mutex_t print_mutex;
-pthread_barrier_t print_barrier;
+volatile int print_count = 1 << 5;
 
 void SIGINT_HANDLER(int d) {
     INTERRUPTED = true;
@@ -29,12 +29,14 @@ void kill_all() {
     thread_node* trav = threads.head, *temp;
     pthread_t* ids = (pthread_t*)malloc(threads.size * sizeof(pthread_t));
     int i = 0, j = 0;
+    pthread_mutex_lock(&threads.mutex);
     while(trav != NULL) {
         ids[i++] = trav->t_id;
         temp = trav->next;
         trav->die = true;
         trav = temp;
     }
+    pthread_mutex_unlock(&threads.mutex);
     for(j = 0; j < i; j++) {
         pthread_join(ids[j], NULL);
     }
@@ -45,9 +47,8 @@ void flag_print_all(int sig) {
     if(INTERRUPTED) return;
     pthread_mutex_lock(&print_mutex);
     printing = true;
-    if(mainbank.size > 0)
-        pthread_barrier_init(&print_barrier, NULL, threads.size);
-    else {
+    print_count = mainbank.size;
+    if(mainbank.size == 0) {
         printing = false;
         printf("There are no accounts in the bank to print\n");
     }
@@ -56,7 +57,15 @@ void flag_print_all(int sig) {
 
 void print_accounts() {
     if(printing) {
-        pthread_barrier_wait(&print_barrier);
+        //pthread_barrier_wait(&print_barrier);
+        pthread_mutex_lock(&print_mutex);
+        print_count -= 1;
+        pthread_mutex_unlock(&print_mutex);
+        while(print_count > 0) {
+            if(INTERRUPTED) {
+                return;
+            }
+        }
         pthread_mutex_lock(&print_mutex);
         if(printing) {
             pthread_mutex_lock(&(mainbank.bank_lock));
@@ -77,6 +86,7 @@ void print_accounts() {
             printing = false;
         }
         pthread_mutex_unlock(&print_mutex);
+        
     }
 }
 
@@ -87,7 +97,9 @@ void parse_command(char* buffer, int n, serve_session* session) {
                 write(session->node->newsocket_fd, INVALIDCOMMAND, INVALIDCOMMAND_LEN);
             }
             else {
-                if(add_account(&mainbank, buffer + CREATE_LEN + 1, 0.0, NOT_IN_SESSION) == 0) {
+                int x = CREATE_LEN + 1;
+                strip(buffer + x);
+                if(add_account(&mainbank, buffer + x, 0.0, NOT_IN_SESSION) == 0) {
                     write(session->node->newsocket_fd, ACCOUNTEXISTS, ACCOUNTEXISTS_LEN);
                 }
                 else {
@@ -106,11 +118,19 @@ void parse_command(char* buffer, int n, serve_session* session) {
                 write(session->node->newsocket_fd, INVALIDCOMMAND, INVALIDCOMMAND_LEN);
             }
             else {
-                session->acc = get_account(&mainbank, buffer + SERVE_LEN + 1);
+                int x = SERVE_LEN + 1;
+                strip(buffer + x);
+                session->acc = get_account(&mainbank, buffer + x);
                 if(session->acc == NULL) {
-                     write(session->node->newsocket_fd, ACCOUNTDOESNTEXIST, ACCOUNTDOESNTEXIST_LEN);
+                    write(session->node->newsocket_fd, ACCOUNTDOESNTEXIST, ACCOUNTDOESNTEXIST_LEN);
+                }
+                else if(session->acc->session == IN_SESSION) {
+                    write(session->node->newsocket_fd, ACCOUNTINUSE, ACCOUNTINUSE_LEN);
                 }
                 else {
+                    pthread_mutex_lock(&(session->acc->lock));
+                    session->acc->session = IN_SESSION;
+                    pthread_mutex_unlock(&(session->acc->lock));
                     write(session->node->newsocket_fd, RETRIEVESUCCESS, RETRIEVESUCCESS_LEN);
                 }
             }

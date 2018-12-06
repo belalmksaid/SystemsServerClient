@@ -14,7 +14,6 @@ typedef struct {
     double balance;
     session_flag session;
     pthread_mutex_t lock;
-
 } account;
 
 typedef struct h_b {
@@ -78,8 +77,6 @@ uint add_to_map(bank* bk, char* name, int index) {
 int add_account(bank* bk, char* nm, double balance, session_flag flag) {
     char* name = (char*)calloc(256, sizeof(char));
     strcpy(name, nm);
-    int l = strlen(name);
-    name[l - 2] = '\0';
 
     if(get_account(bk, name) != NULL) {
         return 0; // account already exists

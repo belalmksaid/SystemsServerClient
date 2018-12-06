@@ -19,6 +19,8 @@
 #define SERVE_LEN 5
 #define QUERY "query"
 #define QUERY_LEN 5
+#define END "end"
+#define END_LEN 3
 
 
 ///// Errors
@@ -39,6 +41,9 @@
 
 #define ACCOUNTDOESNTEXIST "ERROR5"
 #define ACCOUNTDOESNTEXIST_LEN 6
+
+#define ACCOUNTINUSE "ERROR6"
+#define ACCOUNTINUSE_LEN 6
 
 
 //// Success
@@ -76,11 +81,11 @@ thread_node* create_thread_node(linked_list* list) {
     thread_node* node = (thread_node*) malloc(sizeof(thread_node));
     pthread_mutex_lock(&(list->mutex));
     if(list->head != NULL)
-        list->head->next = node;
-    node->prev = list->head;
+        list->head->prev = node;
+    node->prev = NULL;
+    node->next = list->head;
     list->head = node;
     node->parent_list = list;
-    node->next = NULL;
     node->die = false;
     list->size += 1;
     pthread_mutex_unlock(&(list->mutex));
@@ -99,11 +104,17 @@ void delete_node(thread_node* node) {
     if(node->next != NULL)
         node->next->prev = node->prev;
     if(node->parent_list->head == node) {
-        node->parent_list->head = NULL;
+        node->parent_list->head = node->next;
     }
     node->parent_list->size -= 1;
     free(node);
     pthread_mutex_unlock(&(temp->mutex));
+}
+
+void strip(char* inop) {
+    int l = strlen(inop) - 1;
+    while(l >= 0 && (inop[l] == '\n' || inop[l] == '\r')) l--;
+    inop[l + 1] = '\0';
 }
 
 #endif
