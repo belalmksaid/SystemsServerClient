@@ -143,8 +143,8 @@ void parse_command(char* buffer, int n, serve_session* session) {
     {
        if(session->acc != NULL) {
             char output[50];
-            snprintf(output, 50, "%f", session->acc->balance);
-            write(session->node->newsocket_fd, output, strlen(output));
+            snprintf(output, 50, "%.2f", session->acc->balance);
+            write(session->node->newsocket_fd, output, strlen(output)+1);
        }
        else {
            write(session->node->newsocket_fd, NOACTIVESESSION, NOACTIVESESSION_LEN);
@@ -166,8 +166,8 @@ void parse_command(char* buffer, int n, serve_session* session) {
                 else {
                     session->acc->balance += am;
                     char output[50];
-                    snprintf(output, 50, "%f", session->acc->balance);
-                    write(session->node->newsocket_fd, output, strlen(output));
+                    snprintf(output, 50, "%.2f", session->acc->balance);
+                    write(session->node->newsocket_fd, output, strlen(output)+1);
                 }
             }
             else {
@@ -191,8 +191,8 @@ void parse_command(char* buffer, int n, serve_session* session) {
                 else {
                     session->acc->balance -= am;
                     char output[50];
-                    snprintf(output, 50, "%f", session->acc->balance);
-                    write(session->node->newsocket_fd, output, strlen(output));
+                    snprintf(output, 50, "%.2f", session->acc->balance);
+                    write(session->node->newsocket_fd, output, strlen(output)+1);
                 }
             }
             else {
