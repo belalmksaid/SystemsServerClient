@@ -73,7 +73,7 @@ void print_accounts() {
             printf("Diagnostic Account Print\n");
             for(i = 0; i < mainbank.size; i++) {
                 printf("Information for account: %s\n", mainbank.accounts[i].name);
-                printf("Balance: $%lf\n", mainbank.accounts[i].balance);
+                printf("Balance: $%.2lf\n", mainbank.accounts[i].balance);
                 printf("Session flag: ");
                 if(mainbank.accounts[i].session == IN_SESSION) {
                     printf("In Session\n\n");
