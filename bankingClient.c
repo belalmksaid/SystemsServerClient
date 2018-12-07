@@ -22,33 +22,6 @@ void * read_srvr(void * args) {
 	if (n < 0) {
 	     error("Error! Could not read from socket.\n");
 	}
-	else if(strcmp(buffer, READINGERROR) == 0){
-		printf("Reading error. Please try again.\n");
-	}
-	else if(strcmp(buffer, INVALIDCOMMAND) == 0) {
-		printf("Invalid command. Please try again.\n");
-	}
-	else if(strcmp(buffer, ALREADYINSESSION) == 0) {
-		printf("Already in session. Please \"end\" and then try again.\n");
-	}
-	else if(strcmp(buffer, ACCOUNTEXISTS) == 0) {
-		printf("That account already exists. Please enter a new name.\n");
-	}
-	else if(strcmp(buffer, ACCOUNTDOESNTEXIST) == 0) {
-		printf("That account doesn't exist. Please try again.\n");
-	}
-	else if(strcmp(buffer, ACCOUNTINUSE) == 0) {
-		printf("That account is in use already.\n");
-	}
-	else if(strcmp(buffer, NOACTIVESESSION) == 0) {
-		printf("There is no active session yet. Please start one with \"serve [account name]\".\n");
-	}
-	else if(strcmp(buffer, NEGATIVEDEPOSIT) == 0) {
-		printf("You can't deposit a negative amount. Please try withdrawing.\n");
-	}
-	else if(strcmp(buffer, OVERDRAW) == 0) {
-		printf("Overdraw error.\n");
-	}
 	else {
 		printf("%s\n",buffer);
 	}
@@ -94,10 +67,17 @@ int main(int argc, char ** argv) {
     	printf("Enter command:  ");
 	char buffer[512];
 	memset(&buffer,'0', 512);
+	bool quit = false;
 	while(strcmp(buffer, SHUTDOWNMESSAGE) != 0) {
     		printf("Enter command:  ");
 		memset(&buffer,'0', 512);
 		fgets(buffer, 511, stdin);
+		if(strcmp(buffer, "quit\n") == 0) {
+			quit = true;
+		}
+		else {
+			printf("%s", buffer);
+		}
 		int n = write(sockfd,buffer,strlen(buffer));
 		if (n < 0) {
 		     error("Error! Could not write to socket.\n");
@@ -113,9 +93,12 @@ int main(int argc, char ** argv) {
 		}
 		pthread_join(tid, NULL);
 	//	read_srvr((void*)tp);
+		if(quit == true) {
+			break;
+		}
 		sleep(2);
 	}
-	printf("Server disconnected.");
+	printf("Server disconnected.\n");
 
 	return 0;
 }
