@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <signal.h>
 #include "commons.h"
 
 //struct to serve as input and output to read_srv function (for multithreading).
@@ -13,18 +14,32 @@ typedef struct {
 	int sockfd;
 } thread_pointer;
 
+int sockfd; 
+
+void sig_shutdown(int d) {
+	shutdown(sockfd, SHUT_RDWR);
+	printf("Server disconnected.\n");
+	exit(0);
+}
+
 //multithreading function
 void * read_srvr(void * args) {
 	thread_pointer * tp = (thread_pointer*)args;
-	char * buffer = tp->buffer;
+	char * buffer = (char*)malloc(512*sizeof(char));
+	buffer[511] = '\0';
 	int sockfd = tp->sockfd;
-	int n = read(sockfd, buffer, 255);
-	if (n < 0) {
-	     error("Error! Could not read from socket.\n");
+	while(strcmp(buffer, SHUTDOWNMESSAGE) != 0 ) {
+		memset(buffer,'0', 511);
+		int n = read(sockfd, buffer, 256);
+		if (n < 0) {
+		     error("Error! Could not read from socket.\n");
+		}
+		else {
+			printf("%s\n",buffer);
+		}
 	}
-	else {
-		printf("%s\n",buffer);
-	}
+	free(buffer);
+	raise(SIGINT); //SIGINT
 //FREE my n****s
 	return NULL;
 }
@@ -38,7 +53,7 @@ int main(int argc, char ** argv) {
 //	printf("Server name: %s", srvname);
 	int portnum = atoi(argv[2]);
 	//printf("portnum: %d", portnum);
-	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd < 0) {
             	error("Error opening socket\n");
 		exit(1);	
@@ -64,13 +79,23 @@ int main(int argc, char ** argv) {
 		cnct = connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr));
 	}
 	printf("Connected to server %s\n", srvname);
-    	printf("Enter command:  ");
+	thread_pointer * tp = (thread_pointer*)malloc(sizeof(thread_pointer));
+	tp->sockfd = sockfd;
+	pthread_t tid;
+	int err = pthread_create(&tid, NULL, read_srvr, (void *)tp);
+ 	signal(SIGINT, sig_shutdown); //handle sigint
+	if(err != 0){
+		error("Error! Could not create thread!");
+	}
+    	//printf("Enter command:  ");
 	char buffer[512];
-	memset(&buffer,'0', 512);
+	buffer[511] = '\0';
+	memset(&buffer,'0', 511);
 	bool quit = false;
-	while(strcmp(buffer, SHUTDOWNMESSAGE) != 0) {
+	while( true ) {
+		sleep(2);
     		printf("Enter command:  ");
-		memset(&buffer,'0', 512);
+		memset(&buffer,'0', 511);
 		fgets(buffer, 511, stdin);
 		if(strcmp(buffer, "quit\n") == 0) {
 			quit = true;
@@ -80,22 +105,11 @@ int main(int argc, char ** argv) {
 		     error("Error! Could not write to socket.\n");
 		}
 		bzero(buffer,256);
-		thread_pointer * tp = (thread_pointer*)malloc(sizeof(thread_pointer));
-		tp->buffer = buffer;
-		tp->sockfd = sockfd;
-		pthread_t tid;
-	 	int err = pthread_create(&tid, NULL, read_srvr, (void *)tp);
-		if(err != 0){
-			error("Error! Could not create thread!");
-		}
-		pthread_join(tid, NULL);
 	//	read_srvr((void*)tp);
 		if(quit == true) {
 			break;
 		}
-		sleep(2);
 	}
-	printf("Server disconnected.\n");
-
+	raise(SIGINT); //SIGINT
 	return 0;
 }

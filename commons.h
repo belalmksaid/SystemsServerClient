@@ -36,48 +36,48 @@
 
 ///// Errors
 #define SHUTDOWNMESSAGE "SHUTDOWN. "
-#define SHUTDOWNMESSAGE_LEN 10
+#define SHUTDOWNMESSAGE_LEN 11
 
 #define READINGERROR "Reading error. Please try again. "
-#define READINGERROR_LEN 33
+#define READINGERROR_LEN 34
 
 #define INVALIDCOMMAND "Invalid command. Please try again. "
-#define INVALIDCOMMAND_LEN 36
+#define INVALIDCOMMAND_LEN 37
 
 #define ALREADYINSESSION "Already in session. Please \"end\" and then try again. "
-#define ALREADYINSESSION_LEN 53
+#define ALREADYINSESSION_LEN 54
 
 #define ACCOUNTEXISTS "That account already exists. Please enter a new name. "
-#define ACCOUNTEXISTS_LEN 54
+#define ACCOUNTEXISTS_LEN 55
 
 #define ACCOUNTDOESNTEXIST "That account doesn't exist. Please try again. "
-#define ACCOUNTDOESNTEXIST_LEN 46
+#define ACCOUNTDOESNTEXIST_LEN 47
 
 #define ACCOUNTINUSE "That account is in use already. "
-#define ACCOUNTINUSE_LEN 32
+#define ACCOUNTINUSE_LEN 33
 
 #define NOACTIVESESSION "There is no active session yet. Please start one with \"serve [account name]\". "
-#define NOACTIVESESSION_LEN 78
+#define NOACTIVESESSION_LEN 79
 
 #define NEGATIVEDEPOSIT "You can't deposit a negative amount. Please try withdrawing. "
-#define NEGATIVEDEPOSIT_LEN 61
+#define NEGATIVEDEPOSIT_LEN 62
 
 #define OVERDRAW "Overdraw error. "
-#define OVERDRAW_LEN 16
+#define OVERDRAW_LEN 17
 
 
 //// Success
 #define ACCOUNTSUCCESS "Account created successfully. "
-#define ACCOUNTSUCCESS_LEN 30
+#define ACCOUNTSUCCESS_LEN 31
 
 #define RETRIEVESUCCESS "Account retrieved successfully. "
-#define RETRIEVESUCCESS_LEN 32
+#define RETRIEVESUCCESS_LEN 33
 
 #define SESSIONENDED "Session ended successfully. "
-#define SESSIONENDED_LEN 28
+#define SESSIONENDED_LEN 29
 
 #define SUCCESSFULLCONNECTION "Server announces acceptance of connection from client. "
-#define SUCCESSFULLCONNECTION_LEN 55
+#define SUCCESSFULLCONNECTION_LEN 56
 
 
 void error(char* msg) {
