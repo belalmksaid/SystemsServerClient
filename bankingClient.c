@@ -75,9 +75,6 @@ int main(int argc, char ** argv) {
 		if(strcmp(buffer, "quit\n") == 0) {
 			quit = true;
 		}
-		else {
-			printf("%s", buffer);
-		}
 		int n = write(sockfd,buffer,strlen(buffer));
 		if (n < 0) {
 		     error("Error! Could not write to socket.\n");
