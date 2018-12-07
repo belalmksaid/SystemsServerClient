@@ -90,10 +90,10 @@ int main(int argc, char ** argv) {
 		cnct = connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr));
 	}
 	printf("Connected to server %s\n", srvname);
-	thread_pointer * tp = (thread_pointer*)malloc(sizeof(thread_pointer));
-	tp->sockfd = sockfd;
+	thread_pointer tp;
+	tp.sockfd = sockfd;
 	pthread_t tid;
-	int err = pthread_create(&tid, NULL, read_srvr, (void *)tp);
+	int err = pthread_create(&tid, NULL, read_srvr, (void *)&tp);
  	signal(SIGINT, sig_shutdown); //handle sigint
 	if(err != 0){
 		error("Error! Could not create thread!");
