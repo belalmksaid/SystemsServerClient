@@ -35,6 +35,17 @@ void * read_srvr(void * args) {
 		     error("Error! Could not read from socket.\n");
 		}
 		else {
+			bool crashed = true;
+			int i;
+			for(i = 0; i < 511; ++i){
+				if(buffer[i] != '0') {
+					crashed = false;
+					break;
+				}
+			}
+			if(crashed) {
+				break;
+			}
 			printf("%s\n",buffer);
 		}
 	}

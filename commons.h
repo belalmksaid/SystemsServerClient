@@ -42,7 +42,7 @@
 #define READINGERROR_LEN 34
 
 #define INVALIDCOMMAND "Invalid command. Please try again. "
-#define INVALIDCOMMAND_LEN 37
+#define INVALIDCOMMAND_LEN 36
 
 #define ALREADYINSESSION "Already in session. Please \"end\" and then try again. "
 #define ALREADYINSESSION_LEN 54
