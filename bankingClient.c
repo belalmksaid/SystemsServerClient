@@ -51,7 +51,6 @@ void * read_srvr(void * args) {
 	}
 	free(buffer);
 	raise(SIGINT); //SIGINT
-//FREE my n****s
 	return NULL;
 }
 
