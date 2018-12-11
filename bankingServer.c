@@ -53,6 +53,9 @@ void flag_print_all(int sig) {
         printf("There are no accounts in the bank to print\n");
     }
     pthread_mutex_unlock(&print_mutex);
+    if(threads.size == 0 && mainbank.size > 0) {
+        print_accounts();
+    }
 }
 
 void print_accounts() {
